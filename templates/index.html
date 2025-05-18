@@ -1,4 +1,3 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -6,13 +5,24 @@
     <title>Code-Knacker</title>
 </head>
 <body>
-    <h1>🔐 Vierstelligen Code erraten</h1>
+    <h1>🔐 Code-Knacker</h1>
     <form method="post">
-        <input type="text" name="guess" maxlength="4" pattern="\d{4}" required placeholder="4-stelliger Code">
-        <button type="submit">Überprüfen</button>
+        <input type="text" name="guess" placeholder="Code oder Rolex/reset" required>
+        <button type="submit">Absenden</button>
     </form>
+
     {% if message %}
-        <p>{{ message }}</p>
+        <p><strong>{{ message }}</strong></p>
+    {% endif %}
+
+    {% if hint %}
+        <p><em>{{ hint }}</em></p>
+    {% endif %}
+
+    {% if mode == 'rolex' %}
+        <p>🧠 Du bist im Rolex-Modus.</p>
+        <p>❌ Verwendete Codes: {{ guesses|length }}</p>
+        <p>🧮 Übrige Kombinationen: {{ remaining }}</p>
     {% endif %}
 </body>
 </html>
