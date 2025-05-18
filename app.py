@@ -2,56 +2,52 @@ from flask import Flask, render_template, request, session, redirect, url_for
 import random
 
 app = Flask(__name__)
-app.secret_key = 'geheim'
+app.secret_key = 'dein_geheimer_schluessel'  # <- Ersetze durch etwas Sicheres in Produktion
 
-def generate_code():
-    return "".join(random.choices("0123456789", k=4))
+MAX_ATTEMPTS = 10000
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    if 'code' not in session:
-        session['code'] = generate_code()
+    # Initialisiere Spiel bei erster Anfrage
+    if 'number' not in session:
+        session['number'] = random.randint(1, 100)
         session['guesses'] = []
-        session['mode'] = 'normal'
 
-    message = ""
-    hint = ""
-    remaining = 10_000 - len(session['guesses'])  # 10.000 mögliche Kombinationen von 0000–9999
+    message = None
 
-    if request.method == "POST":
-        guess = request.form.get("guess", "")
+    if request.method == 'POST':
+        try:
+            guess = int(request.form['guess'])
+        except ValueError:
+            message = "Bitte gib eine gültige Zahl ein."
+            return render_template('index.html', message=message, guesses=session['guesses'], remaining=MAX_ATTEMPTS - len(session['guesses']))
 
-        if guess == "Rolex":
-            session['mode'] = 'rolex'
-            message = "🔓 Rolex-Modus aktiviert! Du bekommst Hinweise."
-        elif guess == "reset":
-            session.clear()
-            return redirect(url_for("index"))
+        session['guesses'].append(guess)
+
+        if guess < session['number']:
+            message = "Zu niedrig!"
+        elif guess > session['number']:
+            message = "Zu hoch!"
         else:
-            if session['mode'] == 'rolex':
-                if guess in session['guesses']:
-                    message = "❌ Diesen Code hast du schon probiert."
-                else:
-                    session['guesses'].append(guess)
-                    remaining = 10000 - len(session['guesses'])
+            message = f"Richtig! Die Zahl war {session['number']}."
+            number = session['number']
+            guesses = session['guesses']
+            session.clear()
+            return render_template('win.html', number=number, guesses=guesses)
 
-                    if guess == session['code']:
-                        message = "🎉 Du hast den Code geknackt!"
-                        session.clear()
-                        return redirect(url_for("index"))
-                    else:
-                        if guess < session['code']:
-                            hint = "🔼 Der richtige Code ist **größer**."
-                        else:
-                            hint = "🔽 Der richtige Code ist **kleiner**."
-                        message = f"❌ Falscher Code. Noch {remaining} Kombinationen möglich."
-            else:
-                if guess == session['code']:
-                    message = "🎉 Du hast den Code geknackt!"
-                    session.clear()
-                    return redirect(url_for("index"))
-                else:
-                    message = "❌ Falscher Code. Versuch es nochmal."
+        if len(session['guesses']) >= MAX_ATTEMPTS:
+            number = session['number']
+            session.clear()
+            return render_template('lose.html', number=number)
 
-    return render_template("index.html", message=message, hint=hint,
-                           mode=session.get('mode'), guesses=session.get('guesses', []), remaining=remaining)
+    remaining = MAX_ATTEMPTS - len(session['guesses'])
+    return render_template('index.html', message=message, guesses=session['guesses'], remaining=remaining)
+
+@app.route('/reset')
+def reset():
+    session.clear()
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
