@@ -1,0 +1,18 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Code-Knacker</title>
+</head>
+<body>
+    <h1>🔐 Vierstelligen Code erraten</h1>
+    <form method="post">
+        <input type="text" name="guess" maxlength="4" pattern="\d{4}" required placeholder="4-stelliger Code">
+        <button type="submit">Überprüfen</button>
+    </form>
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+</body>
+</html>
