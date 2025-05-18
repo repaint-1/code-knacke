@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Gewonnen!</title>
+</head>
+<body>
+    <h1>Glückwunsch! 🎉</h1>
+    <p>Du hast die richtige Zahl <strong>{{ number }}</strong> erraten!</p>
+    <p>Du hast <strong>{{ guesses|length }}</strong> Versuche gebraucht.</p>
+    <p>Deine Tipps: {{ guesses | join(', ') }}</p>
+
+    <p><a href="{{ url_for('reset') }}">Nochmal spielen</a></p>
+</body>
+</html>
