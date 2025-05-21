@@ -1,19 +1,12 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Du hast gewonnen!</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 30px; background-color: #e0ffe0; }
-        h1 { color: green; }
-    </style>
+    <title>🎉 Gewinn</title>
 </head>
 <body>
-    <h1>🎉 Glückwunsch! Du hast den Code geknackt! 🎉</h1>
-    <p>Benötigte Versuche: {{ attempts }}</p>
-
-    <form method="post" action="{{ url_for('reset') }}">
-        <button type="submit">Neues Spiel starten</button>
+    <h1>{{ message }}</h1>
+    <form method="POST" action="/reset">
+        <button type="submit">🔁 Neues Spiel starten</button>
     </form>
 </body>
 </html>
