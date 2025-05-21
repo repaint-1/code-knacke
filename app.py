@@ -13,10 +13,10 @@ def index():
         session["code"] = generate_code()
         session["attempts"] = 0
         session["show_code"] = False
+        session["allow_hints"] = False
 
     feedback = ""
     code_reveal = ""
-    won = False
 
     if request.method == "POST":
         code_guess = request.form.get("code_guess")
@@ -24,26 +24,30 @@ def index():
 
         if special_code:
             if special_code.lower() == "rolex":
-                return render_template("win.html", message="Spezialcode korrekt! Du hast gewonnen!")
+                session["allow_hints"] = True
+                feedback = "✅ Spezialcode akzeptiert! Hinweise aktiviert."
             else:
-                feedback = "❌ Falscher Spezialcode."
+                feedback = "❌ Falscher Spezialcode. Hinweise bleiben deaktiviert."
+
         elif code_guess:
             session["attempts"] += 1
             secret = session["code"]
 
             if code_guess == secret:
-                won = True
                 return render_template("win.html", message=f"🎉 Du hast den Code in {session['attempts']} Versuchen geknackt!")
-            else:
-                feedback = []
+
+            if session["allow_hints"]:
+                feedback_list = []
                 for i in range(4):
                     if code_guess[i] == secret[i]:
-                        feedback.append(f"Stelle {i+1}: ✔️ korrekt")
+                        feedback_list.append(f"Stelle {i+1}: ✔️ korrekt")
                     elif code_guess[i] > secret[i]:
-                        feedback.append(f"Stelle {i+1}: 🔽 niedriger")
+                        feedback_list.append(f"Stelle {i+1}: 🔽 niedriger")
                     else:
-                        feedback.append(f"Stelle {i+1}: 🔼 höher")
-                feedback = "<br>".join(feedback)
+                        feedback_list.append(f"Stelle {i+1}: 🔼 höher")
+                feedback = "<br>".join(feedback_list)
+            else:
+                feedback = "❌ Falsche Kombination."
 
     if session.get("show_code"):
         code_reveal = f"(🔓 Geheimer Code: {session['code']})"
