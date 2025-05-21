@@ -1,17 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, session
 import random
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
-
-DIGITS = "1234567890"
-CODE_LENGTH = 4
-SPECIAL_CODE = "Rolex"
-
+app.secret_key = 'geheim'
 
 def generate_code():
-    return ''.join(random.choices(DIGITS, k=CODE_LENGTH))
-
+    return ''.join(random.choices('1234567890', k=4))
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -20,54 +14,49 @@ def index():
         session["attempts"] = 0
         session["show_code"] = False
 
-    message = ""
-    show_code = session.get("show_code", False)
-    attempts = session.get("attempts", 0)
+    feedback = ""
+    code_reveal = ""
+    won = False
 
     if request.method == "POST":
-        guess = request.form.get("guess")
+        code_guess = request.form.get("code_guess")
+        special_code = request.form.get("special_code")
 
-        if guess == SPECIAL_CODE:
-            return render_template("win.html", special=True)
-
-        if len(guess) != CODE_LENGTH or not guess.isdigit():
-            message = f"Bitte gib einen {CODE_LENGTH}-stelligen Zahlencode ein."
-        else:
-            session["attempts"] += 1
-            code = session["code"]
-
-            if guess == code:
-                return render_template("win.html", special=False, attempts=session["attempts"])
-            elif guess < code:
-                message = "Der Code ist höher als deine Eingabe."
+        if special_code:
+            if special_code.lower() == "rolex":
+                return render_template("win.html", message="Spezialcode korrekt! Du hast gewonnen!")
             else:
-                message = "Der Code ist niedriger als deine Eingabe."
+                feedback = "❌ Falscher Spezialcode."
+        elif code_guess:
+            session["attempts"] += 1
+            secret = session["code"]
 
-    return render_template("index.html", 
-                           message=message,
-                           attempts=attempts,
-                           show_code=show_code,
-                           current_code=session.get("code") if show_code else None)
+            if code_guess == secret:
+                won = True
+                return render_template("win.html", message=f"🎉 Du hast den Code in {session['attempts']} Versuchen geknackt!")
+            else:
+                feedback = []
+                for i in range(4):
+                    if code_guess[i] == secret[i]:
+                        feedback.append(f"Stelle {i+1}: ✔️ korrekt")
+                    elif code_guess[i] > secret[i]:
+                        feedback.append(f"Stelle {i+1}: 🔽 niedriger")
+                    else:
+                        feedback.append(f"Stelle {i+1}: 🔼 höher")
+                feedback = "<br>".join(feedback)
 
+    if session.get("show_code"):
+        code_reveal = f"(🔓 Geheimer Code: {session['code']})"
 
-@app.route("/reset")
+    return render_template("index.html", feedback=feedback, attempts=session["attempts"], code_reveal=code_reveal)
+
+@app.route("/reset", methods=["POST"])
 def reset():
-    session.pop("code", None)
-    session.pop("attempts", None)
-    session["show_code"] = False
-    return redirect(url_for("index"))
+    session.clear()
+    return redirect("/")
 
-
-@app.route("/reveal")
-def reveal():
+@app.route("/aufgeben", methods=["POST"])
+def aufgeben():
     session["show_code"] = True
-    return redirect(url_for("index"))
+    return redirect("/")
 
-
-@app.errorhandler(404)
-def not_found(e):
-    return redirect(url_for("index"))
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
