@@ -1,40 +1,35 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Geheimcode-Spiel</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
-        input, button { padding: 10px; margin: 5px; font-size: 16px; }
-        .tip { margin-top: 20px; font-size: 18px; color: #555; }
-    </style>
+    <title>Code-Knacker</title>
 </head>
 <body>
-    <h1>Geheimcode-Spiel</h1>
-    <form method="post" action="{{ url_for('index') }}">
-        <label for="guess">Spezialcode:</label><br>
-        <input type="text" name="guess" maxlength="4" required><br>
-        <button type="submit">Prüfen</button>
+    <h1>🔐 Code-Knacker</h1>
+
+    <form method="POST">
+        <label>🔢 4-stellige Kombination:</label><br>
+        <input type="text" name="code_guess" maxlength="4" pattern="[0-9]{4}"><br><br>
+
+        <label>✨ Spezialcode:</label><br>
+        <input type="text" name="special_code"><br><br>
+
+        <button type="submit">Absenden</button>
     </form>
 
-    {% if hint %}
-        <div class="tip">
-            <strong>Tipp:</strong> {{ hint }}
-        </div>
+    <form method="POST" action="/reset" style="margin-top: 15px;">
+        <button type="submit">🔁 Spiel neustarten</button>
+    </form>
+
+    <form method="POST" action="/aufgeben" style="margin-top: 10px;">
+        <button type="submit">😵 Aufgeben</button>
+    </form>
+
+    <p><strong>Versuche:</strong> {{ attempts }}</p>
+    {% if feedback %}
+        <p><strong>Hinweis:</strong><br> {{ feedback|safe }}</p>
     {% endif %}
-
-    <p>Versuche: {{ attempts }}</p>
-
-    <form method="post" action="{{ url_for('reset') }}">
-        <button type="submit">Spiel Neustarten</button>
-    </form>
-
-    <form method="post" action="{{ url_for('reveal') }}">
-        <button type="submit">Aufgeben</button>
-    </form>
-
-    {% if reveal_code %}
-        <p><strong>Der Code war:</strong> {{ reveal_code }}</p>
+    {% if code_reveal %}
+        <p style="color: red;">{{ code_reveal }}</p>
     {% endif %}
 </body>
 </html>
