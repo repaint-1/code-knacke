@@ -2,34 +2,62 @@
 <html>
 <head>
     <title>Code-Knacker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f2f2f2;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        input, button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 250px;
+        }
+        form {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
-    <h1>🔐 Code-Knacker</h1>
+    <div class="container">
+        <h1>🔐 Code-Knacker</h1>
 
-    <form method="POST">
-        <label>🔢 4-stellige Kombination:</label><br>
-        <input type="text" name="code_guess" maxlength="4" pattern="[0-9]{4}"><br><br>
+        <form method="POST">
+            <input type="text" name="code_guess" maxlength="4" pattern="[0-9]{4}" placeholder="🔢 4-stellige Kombination"><br>
+            <input type="text" name="special_code" placeholder="✨ Spezialcode"><br>
+            <button type="submit">Absenden</button>
+        </form>
 
-        <label>✨ Spezialcode:</label><br>
-        <input type="text" name="special_code"><br><br>
+        <form method="POST" action="/reset">
+            <button type="submit">🔁 Spiel neustarten</button>
+        </form>
 
-        <button type="submit">Absenden</button>
-    </form>
+        <form method="POST" action="/aufgeben">
+            <button type="submit">😵 Aufgeben</button>
+        </form>
 
-    <form method="POST" action="/reset" style="margin-top: 15px;">
-        <button type="submit">🔁 Spiel neustarten</button>
-    </form>
+        <p><strong>Versuche:</strong> {{ attempts }}</p>
 
-    <form method="POST" action="/aufgeben" style="margin-top: 10px;">
-        <button type="submit">😵 Aufgeben</button>
-    </form>
+        {% if feedback %}
+            <p><strong>Hinweis:</strong><br> {{ feedback|safe }}</p>
+        {% endif %}
 
-    <p><strong>Versuche:</strong> {{ attempts }}</p>
-    {% if feedback %}
-        <p><strong>Hinweis:</strong><br> {{ feedback|safe }}</p>
-    {% endif %}
-    {% if code_reveal %}
-        <p style="color: red;">{{ code_reveal }}</p>
-    {% endif %}
+        {% if code_reveal %}
+            <p style="color: red;">{{ code_reveal }}</p>
+        {% endif %}
+    </div>
 </body>
 </html>
